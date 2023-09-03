@@ -1,0 +1,104 @@
+<?php namespace ProcessWire;
+
+
+class AdminInputHeader extends WireData implements Module {
+
+  /**
+   * Retrieves module meta data
+   * Implementation of the Module interface
+   *
+   * @return array
+   * @see http://processwire.com/apigen/class-Module.html
+   */
+  public static function getModuleInfo() {
+    return array(
+      'title' => 'Admin Input Header',
+      'summary' => 'Show/Hide inputfield header',
+      'version' => 001,
+    //   'href' => 'https://github.com/justonestep/processwire-guidgenerator',
+      'singular' => true,
+      'autoload' => true,
+    );
+  }
+
+  /**
+   * Initialize the module - ready
+   *
+   * ProcessWire calls this when the module is loaded. For 'autoload' modules, this will be called
+   * when ProcessWire's API is ready. As a result, this is a good place to attach hooks.
+   *
+   * @see http://processwire.com/apigen/class-Module.html
+   */
+  public function ready() {
+    $this->addHookProperty('Inputfield::themeInputHeader', $this, 'addProperty');
+    $this->addHookAfter('InputField::getConfigInputfields', $this, 'addRadio');
+    $this->addHookBefore('Inputfield::render', $this, 'renderHeader');
+  }
+
+  /**
+   * Add property for inputfield text
+   *
+   * @param HookEvent $event
+   */
+  public function addProperty(HookEvent $event) {
+    $event->return = '';
+  }
+
+  /**
+   *
+   * @param HookEvent $event
+   */
+  public function addRadio(HookEvent $event){
+    
+    if (!$event->object instanceof Inputfield) return;
+
+    $inputfields = $event->return;
+    $data = $event->object;
+
+    $f = $this->wire('modules')->get('InputfieldRadios');
+    $f->attr('name', 'themeInputHeader');
+    $f->label = $this->_('Input Header');
+    $f->icon = 'tag';
+    $f->addOption('', $this->_('Top'));
+    $f->addOption('h', $this->_('Inline'));
+
+    $f->attr('value', $data->get('themeInputHeader'));
+
+    $columnWidth = 50;
+    $adminTheme = $inputfields->get('_adminTheme')->children;
+    $blank = $adminTheme->get('themeBlank');
+    $f->columnWidth = $columnWidth;
+    $blank->columnWidth = $columnWidth;
+
+    $adminTheme->insertBefore($f, $blank );
+
+    return $inputfields;
+  }
+
+  /**
+   *
+   * @param HookEvent $event
+   */
+  public function renderHeader(HookEvent $event) {
+
+    $field = $event->object;
+
+    if (!$event->object->themeInputHeader) return;
+
+    $field = $event->object;
+
+    $placeholder = $field->label;
+    if($field->required) {
+        $placeholder .= '*';
+    }
+    
+    $currPlaceholder = $field->attr('placeholder');
+    if($currPlaceholder) {
+        $placeholder .= ' : ' . $currPlaceholder;
+    }
+
+    $field->attr('placeholder', $placeholder);
+    
+    $field->headerClass = 'InputfieldHeaderHidden';
+  }
+}
