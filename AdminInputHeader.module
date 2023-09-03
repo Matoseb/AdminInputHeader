@@ -31,7 +31,7 @@ class AdminInputHeader extends WireData implements Module {
    */
   public function ready() {
     $this->addHookProperty('Inputfield::themeInputHeader', $this, 'addProperty');
-    $this->addHookAfter('InputField::getConfigInputfields', $this, 'addRadio');
+    $this->addHookAfter('InputField::getConfigInputfields', $this, 'addRadio', [ 'priority' => 101 ]);
     $this->addHookBefore('Inputfield::render', $this, 'renderHeader');
   }
 
@@ -65,12 +65,10 @@ class AdminInputHeader extends WireData implements Module {
     $f->attr('value', $data->get('themeInputHeader'));
 
     $columnWidth = 50;
-    $adminTheme = $inputfields->get('_adminTheme')->children;
-    $blank = $adminTheme->get('themeBlank');
+    $themeBlank = $inputfields->get('themeBlank');
     $f->columnWidth = $columnWidth;
-    $blank->columnWidth = $columnWidth;
-
-    $adminTheme->insertBefore($f, $blank );
+    $themeBlank->columnWidth = 100-$columnWidth;
+    $inputfields->insertBefore($f, $themeBlank );
 
     return $inputfields;
   }
