@@ -65,10 +65,16 @@ class AdminInputHeader extends WireData implements Module {
     $f->attr('value', $data->get('themeInputHeader'));
 
     $columnWidth = 50;
-    $themeBlank = $inputfields->get('themeBlank');
+    $theme = $inputfields->get('_adminTheme');
+    $elem = $theme->get('themeBlank');
+    if(!$elem) {
+      $elem = $theme->children->last();
+    }
+
     $f->columnWidth = $columnWidth;
-    $themeBlank->columnWidth = 100-$columnWidth;
-    $inputfields->insertBefore($f, $themeBlank );
+    $elem->columnWidth = 100-$columnWidth;
+
+    $inputfields->insertBefore($f, $elem);
 
     return $inputfields;
   }
