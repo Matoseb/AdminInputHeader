@@ -15,7 +15,7 @@ class AdminInputHeader extends WireData implements Module {
       'title' => 'Admin Input Header',
       'summary' => 'Show/Hide inputfield header',
       'version' => 001,
-    //   'href' => 'https://github.com/justonestep/processwire-guidgenerator',
+      'href' => 'https://github.com/Matoseb/AdminInputHeader',
       'singular' => true,
       'autoload' => true,
     );
