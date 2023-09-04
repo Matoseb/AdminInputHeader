@@ -32,7 +32,19 @@ class AdminInputHeader extends WireData implements Module {
   public function ready() {
     $this->addHookProperty('Inputfield::themeInputHeader', $this, 'addProperty');
     $this->addHookAfter('InputField::getConfigInputfields', $this, 'addRadio', [ 'priority' => 101 ]);
-    $this->addHookBefore('Inputfield::render', $this, 'renderHeader');
+    $this->addHookBefore('InputfieldWrapper::render', function(HookEvent $event) {
+      // Get the object the event occurred on, if needed
+      $InputfieldWrapper = $event->object;
+
+      $return = $event->return;
+      
+      foreach($InputfieldWrapper->children as $child) {
+        if (!$child instanceof Inputfield) continue;
+        if ($child->themeInputHeader) self::renderHeader($child);
+      }
+
+      $event->return = $return;
+    });
   }
 
   /**
@@ -66,7 +78,13 @@ class AdminInputHeader extends WireData implements Module {
 
     $columnWidth = 50;
     $theme = $inputfields->get('_adminTheme');
-    $elem = $theme->get('themeBlank');
+
+    if(!$theme) {
+        $inputfields->append($f);
+        return;
+    }
+
+    $elem = $inputfields->get('themeBlank');
     if(!$elem) {
       $elem = $theme->children->last();
     }
@@ -79,17 +97,7 @@ class AdminInputHeader extends WireData implements Module {
     return $inputfields;
   }
 
-  /**
-   *
-   * @param HookEvent $event
-   */
-  public function renderHeader(HookEvent $event) {
-
-    $field = $event->object;
-
-    if (!$event->object->themeInputHeader) return;
-
-    $field = $event->object;
+  public function renderHeader(Inputfield $field) {
 
     $placeholder = $field->label;
     if($field->required) {
